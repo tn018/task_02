@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import requests
 import re
 import scipy.special as sc
-import matplotlib.ticker as mt
+import urllib.request as ur
 
 def a(n, x):
     return sc.spherical_jn(n, x) / h(n, x) 
@@ -45,10 +44,18 @@ def RCS(D, fmin, fmax):
 if __name__ == '__main__':
     try: os.mkdir('results')
     except OSError: pass
-    r = requests.get('https://jenyay.net/uploads/Student/Modelling/task_02.txt')
-    z = re.search(r'^7\..+', r.text, flags=re.M)
-    z1 = (z.group().split(';'))
-    D = float(z1[0].split('=')[1])
-    fmin = float(z1[1].split('=')[1])
-    fmax = float(z1[2].split('=')[1])
+    r = ur.urlopen('https://jenyay.net/uploads/Student/Modelling/task_02.txt')
+    lines = []
+    for i in r.readlines():
+        С = str(i.strip())
+        lines.append(С[2:-1])
+    for i in lines:
+        if re.match(r'7\.', i): z= i
+    z1 = (z.split(';'))
+    A = [z1[0].split('=')[1], z1[1].split('=')[1], z1[2].split('=')[1]]
+    B = [float(x) for x in A]
+    D, fmin, fmax = B[0], B[1], B[2]
+    print(D,type(D))
+    print(fmin,type(fmin))
+    print(fmax,type(fmax))
     RCS(D, fmin, fmax)
